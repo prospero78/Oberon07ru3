@@ -41,7 +41,6 @@ CONST
 		nil* = 25; string* = 26; not* = 27; lparen* = 28; lbrak* = 29;
 		lbrace* = 30; ident* = 31;
 		if* = 32;
-		(* если* = if + 500; *)
 		while* = 34; repeat* = 35; case* = 36; for* = 37;
 		comma* = 40; colon* = 41; becomes* = 42; upto* = 43; rparen* = 44;
 		rbrak* = 45; rbrace* = 46; then* = 47; of* = 48; do* = 49;
@@ -50,6 +49,8 @@ CONST
 		array* = 60; record* = 61; pointer* = 62;
 		const* = 70; type* = 71; var* = 72; procedure* = 73; begin* = 74;
 		import* = 76; module* = 77;
+		(* ============================================================= *)
+		(* если* = if + 500; *)
 
 	call* = 100; par* = 101; sproc* = 102; bitset* = 104;
 
@@ -197,38 +198,38 @@ PROCEDURE String(quoteCh: CHAR);
 
 PROCEDURE HexString;
 	VAR i, m, n: INTEGER;
-BEGIN
-	i := 0; Read;
-	WHILE eof & (ch # '$') DO
-		WHILE (ch = ' ') OR (ch = 9X) OR (ch = 0DX) DO
+	BEGIN
+		i := 0; Read;
+		WHILE eof & (ch # '$') DO
+			WHILE (ch = ' ') OR (ch = 9X) OR (ch = 0DX) DO
+				Read
+			END;
+			IF ('0' <= ch) & (ch <= '9') THEN
+				m := ORD(ch) - 30H
+			ELSIF ('A' <= ch) & (ch <= 'F') THEN
+				m := ORD(ch) - 37H
+			ELSE
+				m := 0; Mark('Ошибочное HEX число')
+			END;
+			Read;
+			IF ('0' <= ch) & (ch <= '9') THEN
+				n := ORD(ch) - 30H
+			ELSIF ('A' <= ch) & (ch <= 'F') THEN
+				n := ORD(ch) - 37H
+			ELSE
+				n := 0;
+				Mark('Ошибочное HEX число')
+			END;
+			IF i < MaxStrLen THEN
+				str[i] := CHR(m*10H + n); INC(i)
+			ELSE
+				Mark('строка слишком длинная')
+			END;
 			Read
-		END;
-		IF ('0' <= ch) & (ch <= '9') THEN
-			m := ORD(ch) - 30H
-		ELSIF ('A' <= ch) & (ch <= 'F') THEN
-			m := ORD(ch) - 37H
-		ELSE
-			m := 0; Mark('Hex digit expected')
-		END;
-		Read;
-		IF ('0' <= ch) & (ch <= '9') THEN
-			n := ORD(ch) - 30H
-		ELSIF ('A' <= ch) & (ch <= 'F') THEN
-			n := ORD(ch) - 37H
-		ELSE
-			n := 0;
-			Mark('Hex digit expected')
-		END;
-		IF i < MaxStrLen THEN
-			str[i] := CHR(m*10H + n); INC(i)
-		ELSE
-			Mark('строка слишком длинная')
-		END;
-		Read
-	 END;
-	 Read;
-	 slen := i  (* no 0X appended! *)
-END HexString;
+		 END;
+		 Read;
+		 slen := i  (* no 0X appended! *)
+	END HexString;
 
 PROCEDURE Real(VAR sym: INTEGER; d: ARRAY OF INTEGER; n: INTEGER);
 	VAR
@@ -242,7 +243,7 @@ PROCEDURE Real(VAR sym: INTEGER; d: ARRAY OF INTEGER; n: INTEGER);
 		f := BigNums.Zero;
 		REPEAT
 			IF d[i] > 10 THEN
-				Mark('Bad number')
+				Mark('Плохое число')
 			ELSE
 				BigNums.SetDecimalDigit(x, k, d[i])
 			END;
@@ -253,7 +254,7 @@ PROCEDURE Real(VAR sym: INTEGER; d: ARRAY OF INTEGER; n: INTEGER);
 			IF i > BigNums.MaxDecimalDigits-19 THEN
 				BigNums.SetDecimalDigit(f, i, ORD(ch)-30H)
 			ELSIF i = BigNums.MaxDecimalDigits-19 THEN
-				Mark('Fraction too long')
+				Mark('Дробь слишком длинная')
 			END;
 			DEC(i);
 			Read
@@ -266,11 +267,11 @@ PROCEDURE Real(VAR sym: INTEGER; d: ARRAY OF INTEGER; n: INTEGER);
 			IF (ch >= '0') & (ch <= '9') THEN
 				REPEAT e := e*10 + ORD(ch)-30H; Read
 				UNTIL (ch < '0') OR (ch > '9') OR (e > maxExp);
-				IF e > maxExp THEN Mark('Exponent too large');
+				IF e > maxExp THEN Mark('Экспонента слишком большая');
 					WHILE (ch < '0') OR (ch > '9') DO Read END
 				END;
 				IF negE THEN e := -e END
-			ELSE Mark('Digit?')
+			ELSE Mark('Цифра?')
 			END;
 			i := BigNums.MaxDecimalDigits-1;
 			WHILE e > 0 DO BigNums.MultiplyByTen(x, x);
@@ -325,7 +326,7 @@ PROCEDURE Number(VAR sym: INTEGER);
 		ival := 0; i := 0; n := 0; k2 := 0;
 		 REPEAT
 			IF n < LEN(d) THEN d[n] := ORD(ch) - 30H; INC(n)
-			ELSE Mark('Too many digits'); n := 0
+			ELSE Mark('Слишком много цифр'); n := 0
 			END;
 			Read
 		 UNTIL (ch < '0') OR (ch > '9') & (ch < 'A') OR (ch > 'F');
@@ -336,7 +337,7 @@ PROCEDURE Number(VAR sym: INTEGER);
 			UNTIL i = n;
 			IF ch = 'X' THEN sym := string;
 				IF k2 < 10000H THEN ival := k2
-				ELSE Mark('Illegal value'); ival := 0
+				ELSE Mark('Неверное значение'); ival := 0
 				END;
 				IF k2 = 0 THEN str[0] := 0X; slen := 1
 				ELSE str[0] := CHR(k2); str[1] := 0X; slen := 2
@@ -350,9 +351,9 @@ PROCEDURE Number(VAR sym: INTEGER);
 				REPEAT
 					IF d[i] < 10 THEN
 						IF k2 <= (max-d[i]) DIV 10 THEN k2 := k2 * 10 + d[i]
-						ELSE Mark('Too large'); k2 := 0
+						ELSE Mark('Слишком большое'); k2 := 0
 						END
-					ELSE Mark('Bad integer')
+					ELSE Mark('Неверное целое')
 					END;
 					INC(i)
 				UNTIL i = n;
@@ -364,9 +365,9 @@ PROCEDURE Number(VAR sym: INTEGER);
 			REPEAT
 				IF d[i] < 10 THEN
 					IF k2 <= (max-d[i]) DIV 10 THEN k2 := k2*10 + d[i]
-					ELSE Mark ('Too large'); k2 := 0
+					ELSE Mark ('Слишком большое'); k2 := 0
 					END
-				ELSE Mark('Bad integer')
+				ELSE Mark('Неверное целое')
 				END;
 				INC(i)
 			UNTIL i = n;
@@ -386,7 +387,7 @@ PROCEDURE SkipComment(lev: INTEGER);
 			END;
 			pragma[i] := 0X;
 			IF ch = '*' THEN SetCompilerFlag(pragma)
-			ELSE Mark('Incorrect compiler directive')
+			ELSE Mark('Некорректая директива компилятора')
 			END
 		END SetPragma;
 
