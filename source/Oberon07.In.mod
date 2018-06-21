@@ -1,4 +1,5 @@
 MODULE Oberon07.In;
+
 IMPORT
    SYSTEM;
 VAR
@@ -106,7 +107,7 @@ PROCEDURE Int*(VAR i: INTEGER);
 		END
 	END Int;
 
-PROCEDURE Настроить;
+PROCEDURE Init;
    VAR kern32: INTEGER;
    PROCEDURE Import(
       VAR proc: ARRAY OF SYSTEM.BYTE; lib: INTEGER; name: ARRAY OF CHAR);
@@ -122,7 +123,7 @@ PROCEDURE Настроить;
 			END
 		END Import;
 
-	BEGIN (* Настроить *)
+	BEGIN (* Init *)
 		SYSTEM.LoadLibraryW(kern32, 'kernel32.dll');
 		Import(GetStdHandle, kern32, 'GetStdHandle');
 		Import(ReadConsoleW, kern32, 'ReadConsoleW')
