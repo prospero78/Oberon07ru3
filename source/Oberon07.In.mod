@@ -130,6 +130,6 @@ PROCEDURE Init;
 	END Init;
 
 BEGIN
-	Настроить;
+	Init;
 	Open
 END In.
