@@ -90,11 +90,11 @@ PROCEDURE Build(fname: ARRAY OF CHAR);
 (* -------------------------------------------------------------------------- *)
 (* -------------------------------------------------------------------------- *)
 
-PROCEDURE Get;
+PROCEDURE Арг_Получ;
    BEGIN
       INC(argIdx);
       Rtl.GetArg(arg, argIdx)
-   END Get;
+   END Арг_Получ;
 
 PROCEDURE Mark(msg: ARRAY OF CHAR);
    BEGIN
@@ -110,16 +110,16 @@ PROCEDURE Arguments;
          Rtl.LowerCase(arg);
          IF arg = '/b' THEN
             buildMode := TRUE;
-            Get; Arguments
+            Арг_Получ; Arguments
          ELSIF arg = '/sym' THEN
-            Get;
+            Арг_Получ;
             IF arg[0] = '/' THEN
                Mark('путь до symbols?'); Option
             ELSE
-               B.SetSymPath(arg); Get; Arguments
+               B.SetSymPath(arg); Арг_Получ; Arguments
             END
          ELSE (* unhandled *)
-            Get; Arguments
+            Арг_Получ; Arguments
          END
       END Option;
 
@@ -131,7 +131,7 @@ PROCEDURE Arguments;
          ELSE
             Mark('другое имя файла?')
          END;
-         Get; Arguments
+         Арг_Получ; Arguments
       ELSIF arg[0] = '/' THEN Option
       END
    END Arguments;
@@ -143,7 +143,7 @@ PROCEDURE NotifyError(pos: INTEGER; msg: ARRAY OF CHAR);
    END NotifyError;
 
 BEGIN
-   S.InstallNotifyError(NotifyError); Get; Arguments;
+   S.InstallNotifyError(NotifyError); Арг_Получ; Arguments;
    IF fname[0] # 0X THEN
       IF Files.Old(fname) # NIL THEN
          IF ~buildMode THEN
