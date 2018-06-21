@@ -1,0 +1,13 @@
+*.sym
+test/*.exe
+test/*.dll
+lib/*.dll
+nppPlugin/*.dll
+*.vs/
+build/*.dll
+build/*.exe
+.pocDebug
+.tempOut
+.tempSymfile
+build/movebin.bat
+source/movebin.bat
