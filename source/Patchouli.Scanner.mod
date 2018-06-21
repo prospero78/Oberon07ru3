@@ -29,7 +29,7 @@ IMPORT SYSTEM,
 CONST
 	MaxIdLen* = 63; MaxStrLen* = 255;
 	MaxInt = 9223372036854775807; MinInt = -MaxInt - 1;
-	NKW = 35;  (* Number of keywords *)
+	NKW = 2000;  (* число ключевых слов, размер массива *)
 	maxExp = 308; stringBufSize = 256;
 
 	(* Symbols *)
@@ -50,27 +50,28 @@ CONST
 		const* = 70; type* = 71; var* = 72; procedure* = 73; begin* = 74;
 		import* = 76; module* = 77;
 		(* ============================================================= *)
-		(* если* = if + 500; *)
+		esli* = if + 500;
 
-	call* = 100; par* = 101; sproc* = 102; bitset* = 104;
+	(* asm *)
+		call* = 100; par* = 101; sproc* = 102; bitset* = 104;
 
-	begSf* = 110;
-	sfABS* = 110; sfODD* = 111; sfLEN* = 112;
-	sfLSL* = 113; sfASR* = 114; sfROR* = 115;
-	sfFLOOR* = 116; sfFLT* = 117; sfORD* = 118; sfCHR* = 119;
+		begSf* = 110;
+		sfABS* = 110; sfODD* = 111; sfLEN* = 112;
+		sfLSL* = 113; sfASR* = 114; sfROR* = 115;
+		sfFLOOR* = 116; sfFLT* = 117; sfORD* = 118; sfCHR* = 119;
 
-	sfADR* = 120; sfBIT* = 121; sfVAL* = 122; sfSIZE* = 123;
-	sfNtCurrentTeb* = 124; sfCAS* = 125;
-	endSf* = 129;
+		sfADR* = 120; sfBIT* = 121; sfVAL* = 122; sfSIZE* = 123;
+		sfNtCurrentTeb* = 124; sfCAS* = 125;
+		endSf* = 129;
 
-	begSp* = 130;
-	spINC* = 130; spDEC* = 131; spINCL* = 132; spEXCL* = 133;
-	spNEW* = 134; spASSERT* = 135; spPACK* = 136; spUNPK* = 137;
-	spGET* = 138; spPUT* = 139; spCOPY* = 140;
+		begSp* = 130;
+		spINC* = 130; spDEC* = 131; spINCL* = 132; spEXCL* = 133;
+		spNEW* = 134; spASSERT* = 135; spPACK* = 136; spUNPK* = 137;
+		spGET* = 138; spPUT* = 139; spCOPY* = 140;
 
-	spLoadLibraryW* = 151; spGetProcAddress* = 152; spINT3* = 154;
-	spPAUSE* = 155;
-	endSp* = 159;
+		spLoadLibraryW* = 151; spGetProcAddress* = 152; spINT3* = 154;
+		spPAUSE* = 155;
+		endSp* = 159;
 
 TYPE
 	IdStr* = ARRAY MaxIdLen+1 OF CHAR;
@@ -163,7 +164,7 @@ PROCEDURE Identifier(VAR sym: INTEGER);
 			id[MaxIdLen] := 0X
 		END;
 		IF i < 11 THEN
-			k2 := KWX[i-1];  (* search for keyword *)
+			k2 := KWX[i-1];  (* поиск по ключевому слову *)
 			WHILE (id # keyTab[k2].id) & (k2 < KWX[i]) DO
 				INC(k2)
 			END;
@@ -386,8 +387,10 @@ PROCEDURE SkipComment(lev: INTEGER);
 				pragma[i] := ch; Read; INC(i)
 			END;
 			pragma[i] := 0X;
-			IF ch = '*' THEN SetCompilerFlag(pragma)
-			ELSE Mark('Некорректая директива компилятора')
+			IF ch = '*' THEN
+				SetCompilerFlag(pragma)
+			ELSE
+				Mark('Некорректая директива компилятора')
 			END
 		END SetPragma;
 
@@ -491,7 +494,7 @@ PROCEDURE EnterKW(sym: INTEGER; name: IdStr);
 BEGIN
 	k := 0; KWX[0] := 0; KWX[1] := 0;
 	EnterKW(if, 'IF');
-	(* EnterKW(если, 'ЕСЛИ'); *)
+	EnterKW(esli, 'ЕСЛИ');
 
 	EnterKW(do, 'DO');
 	EnterKW(of, 'OF');
